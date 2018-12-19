@@ -13,25 +13,25 @@ class ItemStatistic {
     }
 
     getBuyMargin() {
-        return this.max_price - this.moving_average;
+        return this.max_price - this.median;
     }
 
     getSellMargin() {
-        return this.moving_average - this.min_price;
+        return this.median - this.min_price;
     }
 }
 
 export async function getStats(item)  {
-    const url = `https://cors-anywhere.herokuapp.com/https://api.warframe.market/v1/items/${item}/statistics`;
-    const resp = await rp.get(url);
-    const parsed = JSON.parse(resp);
+    const url = `http://localhost:5000/${item}/statistics`;
+    const resp = await fetch(url);
+    const parsed = await resp.json();
     const stats = parsed["payload"]["statistics_closed"]["90days"];
 
     let res = [];
     stats.forEach(stat => {
         let date = moment(stat.datetime);
         res.push(new ItemStatistic(item, date, stat.volume, stat.max_price, stat.min_price,
-            stat.median, Math.round(stat.moving_avg)));
+            stat.median, stat.moving_avg));
     });
     return res;
 }
